@@ -1,0 +1,74 @@
+{
+  "brochures": [
+    {
+      "id": "1",
+      "type": "guilion",
+      "title": "גיליון פרשת יתרו תשפ״ד",
+      "url": "/brochures/guilion-yitro-5784.pdf",
+      "date": "2024-01-26T00:00:00.000Z"
+    },
+    {
+      "id": "2",
+      "type": "guilion",
+      "title": "גיליון פרשת בשלח תשפ״ד",
+      "url": "/brochures/guilion-beshalach-5784.pdf",
+      "date": "2024-01-19T00:00:00.000Z"
+    },
+    {
+      "id": "3",
+      "type": "guilion",
+      "title": "גיליון פרשת בא תשפ״ד",
+      "url": "/brochures/guilion-bo-5784.pdf",
+      "date": "2024-01-12T00:00:00.000Z"
+    },
+    {
+      "id": "4",
+      "type": "guilion",
+      "title": "גיליון פרשת וארא תשפ״ד",
+      "url": "/brochures/guilion-vaera-5784.pdf",
+      "date": "2024-01-05T00:00:00.000Z"
+    },
+    {
+      "id": "5",
+      "type": "guilion",
+      "title": "גיליון פרשת שמות תשפ״ד",
+      "url": "/brochures/guilion-shemot-5784.pdf",
+      "date": "2023-12-29T00:00:00.000Z"
+    },
+    {
+      "id": "6",
+      "type": "alon",
+      "title": "עלון פרשת יתרו תשפ״ד",
+      "url": "/brochures/alon-yitro-5784.pdf",
+      "date": "2024-01-26T00:00:00.000Z"
+    },
+    {
+      "id": "7",
+      "type": "alon",
+      "title": "עלון פרשת בשלח תשפ״ד",
+      "url": "/brochures/alon-beshalach-5784.pdf",
+      "date": "2024-01-19T00:00:00.000Z"
+    },
+    {
+      "id": "8",
+      "type": "alon",
+      "title": "עלון פרשת בא תשפ״ד",
+      "url": "/brochures/alon-bo-5784.pdf",
+      "date": "2024-01-12T00:00:00.000Z"
+    },
+    {
+      "id": "9",
+      "type": "alon",
+      "title": "עלון פרשת וארא תשפ״ד",
+      "url": "/brochures/alon-vaera-5784.pdf",
+      "date": "2024-01-05T00:00:00.000Z"
+    },
+    {
+      "id": "10",
+      "type": "alon",
+      "title": "עלון פרשת שמות תשפ״ד",
+      "url": "/brochures/alon-shemot-5784.pdf",
+      "date": "2023-12-29T00:00:00.000Z"
+    }
+  ]
+}
