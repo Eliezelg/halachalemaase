@@ -5,6 +5,7 @@ const nextConfig = {
     ignoreBuildErrors: true
   },
   images: {
+    unoptimized: true, // Permet l'utilisation d'images locales sans optimisation
     remotePatterns: [
       {
         protocol: 'https',
