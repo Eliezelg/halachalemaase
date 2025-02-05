@@ -1,6 +1,4 @@
 {
-  "/api/getBinyanImages/route": "app/api/getBinyanImages/route.js",
-  "/page": "app/page.js",
-  "/questions/page": "app/questions/page.js",
-  "/Binyan/page": "app/Binyan/page.js"
+  "/luach/page": "app/luach/page.js",
+  "/page": "app/page.js"
 }
