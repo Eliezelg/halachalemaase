@@ -17,6 +17,7 @@ import { tzadiBrachot } from './Tzadi';
 import { kufBrachot } from './Kuf';
 import { reshBrachot } from './Resh';
 import { shinBrachot } from './Shin';
+import { tavBrachot } from './Tav';
 
 export interface Blessing {
   name: string;
@@ -28,7 +29,9 @@ export interface Blessing {
 
 export interface BlessingCategory {
   title: string;
-  blessings: Blessing[];
+  blessings?: Blessing[];
+  items?: Blessing[];
+  letter?: string;
 }
 
 // Trier les bénédictions selon l'ordre de l'alphabet hébreu
@@ -888,5 +891,6 @@ export const brachot: BlessingCategory[] = [
   tzadiBrachot,  // צ
   kufBrachot,    // ק
   reshBrachot,   // ר
-  shinBrachot    // ש
+  shinBrachot,   // ש
+  tavBrachot     // ת
 ];

@@ -10,7 +10,7 @@ export default function AboutRavPage() {
           <h2 className="text-2xl font-bold mb-4">הפוסק האדיר הגאון הרב אופיר יצחק מלכא שליט&quot;א</h2>
           <div className="relative w-64 h-80 mx-auto mb-6">
             <Image
-              src="/rav.jpg"
+              src="/rav.png"
               alt="הרב אופיר יצחק מלכא שליט״א"
               fill
               style={{ objectFit: 'cover' }}

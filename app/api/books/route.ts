@@ -2,29 +2,21 @@ import { NextResponse } from 'next/server';
 import { writeFile } from 'fs/promises';
 import path from 'path';
 import fs from 'fs/promises';
-import { books as initialBooks } from '@/data/books';
-import { Book } from '@/types/books';
+import { bookService } from '@/services/books';
+import { convertPrismaBook } from '@/types/prisma';
 
-const BOOKS_FILE = path.join(process.cwd(), 'data/books.ts');
 const IMAGES_DIR = path.join(process.cwd(), 'public/Sfarim');
-
-// Fonction utilitaire pour lire les livres
-async function readBooks(): Promise<Book[]> {
-  return initialBooks;
-}
-
-// Fonction utilitaire pour écrire les livres
-async function writeBooks(books: Book[]) {
-  const content = `import { Book } from '../types/books';\n\nexport const books: Book[] = ${JSON.stringify(books, null, 2)};`;
-  await fs.writeFile(BOOKS_FILE, content, 'utf-8');
-}
 
 export async function GET() {
   try {
-    const books = await readBooks();
-    return NextResponse.json({ books });
+    const books = await bookService.getAllBooks();
+    return NextResponse.json(books.map(convertPrismaBook));
   } catch (error) {
-    return NextResponse.json({ error: 'Error reading books' }, { status: 500 });
+    console.error('API Error - GET /api/books:', error);
+    return NextResponse.json({ 
+      error: 'Error reading books',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
 
@@ -38,50 +30,48 @@ export async function POST(request: Request) {
     const nedarimPlusLink = formData.get('nedarimPlusLink') as string;
     const isNew = formData.get('isNew') === 'true';
 
-    if (!title || !description || !price || !image) {
+    if (!title || !description) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Créer le répertoire des images s'il n'existe pas
-    await fs.mkdir(IMAGES_DIR, { recursive: true });
+    let imageUrl = null;
+    if (image) {
+      // Créer le répertoire des images s'il n'existe pas
+      await fs.mkdir(IMAGES_DIR, { recursive: true });
 
-    // Générer un nom de fichier unique
-    const imageExt = image.name.split('.').pop();
-    const imageName = `${Date.now()}.${imageExt}`;
-    const imagePath = path.join(IMAGES_DIR, imageName);
+      // Générer un nom de fichier unique
+      const timestamp = Date.now();
+      const filename = `${timestamp}-${image.name}`;
+      const imagePath = path.join(IMAGES_DIR, filename);
 
-    // Sauvegarder l'image
-    const bytes = await image.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    await fs.writeFile(imagePath, buffer);
+      // Écrire le fichier
+      const bytes = await image.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      await writeFile(imagePath, buffer);
 
-    // Lire les livres existants
-    const books = await readBooks();
+      // Définir l'URL de l'image relative au dossier public
+      imageUrl = `/Sfarim/${filename}`;
+    }
 
-    // Ajouter le nouveau livre
-    const newBook: Book = {
-      id: (books.length + 1).toString(),
+    const book = await bookService.createBook({
       title,
       description,
-      price: `₪${price} כולל משלוח`,
-      image: `/Sfarim/${imageName}`,
+      price,
+      imageUrl,
       nedarimPlusLink,
-      isNew
-    };
+      isNew,
+    });
 
-    books.push(newBook);
-    await writeBooks(books);
-
-    return NextResponse.json(newBook);
+    return NextResponse.json(book);
   } catch (error) {
-    console.error('Error creating book:', error);
-    return NextResponse.json(
-      { error: 'Error creating book' },
-      { status: 500 }
-    );
+    console.error('API Error - POST /api/books:', error);
+    return NextResponse.json({ 
+      error: 'Error creating book',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
 
@@ -96,74 +86,55 @@ export async function PUT(request: Request) {
     const nedarimPlusLink = formData.get('nedarimPlusLink') as string;
     const isNew = formData.get('isNew') === 'true';
 
-    if (!id || !title || !description || !price) {
+    if (!id || !title || !description) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    // Lire les livres existants
-    const books = await readBooks();
-    const bookIndex = books.findIndex(b => b.id === id);
-
-    if (bookIndex === -1) {
-      return NextResponse.json(
-        { error: 'Book not found' },
-        { status: 404 }
-      );
-    }
-
-    // Mettre à jour le livre
-    const updatedBook: Book = {
-      ...books[bookIndex],
-      title,
-      description,
-      price: `₪${price} כולל משלוח`,
-      nedarimPlusLink,
-      isNew
-    };
-
-    // Si une nouvelle image est fournie
+    let imageUrl = undefined;
     if (image) {
-      // Supprimer l'ancienne image si elle existe
-      const oldImagePath = path.join(process.cwd(), 'public', books[bookIndex].image);
-      try {
-        await fs.unlink(oldImagePath);
-      } catch (error) {
-        console.error('Error deleting old image:', error);
-      }
+      // Créer le répertoire des images s'il n'existe pas
+      await fs.mkdir(IMAGES_DIR, { recursive: true });
 
-      // Sauvegarder la nouvelle image
-      const imageExt = image.name.split('.').pop();
-      const imageName = `${Date.now()}.${imageExt}`;
-      const imagePath = path.join(IMAGES_DIR, imageName);
+      // Générer un nom de fichier unique
+      const timestamp = Date.now();
+      const filename = `${timestamp}-${image.name}`;
+      const imagePath = path.join(IMAGES_DIR, filename);
 
+      // Écrire le fichier
       const bytes = await image.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      await fs.writeFile(imagePath, buffer);
+      await writeFile(imagePath, buffer);
 
-      updatedBook.image = `/Sfarim/${imageName}`;
+      // Construire l'URL de l'image
+      imageUrl = `/Sfarim/${filename}`;
     }
 
-    books[bookIndex] = updatedBook;
-    await writeBooks(books);
+    const book = await bookService.updateBook(id, {
+      title,
+      description,
+      price: price || null,
+      ...(imageUrl && { imageUrl }),
+      nedarimPlusLink: nedarimPlusLink || null,
+      isNew,
+    });
 
-    return NextResponse.json(updatedBook);
+    return NextResponse.json(convertPrismaBook(book));
   } catch (error) {
-    console.error('Error updating book:', error);
-    return NextResponse.json(
-      { error: 'Error updating book' },
-      { status: 500 }
-    );
+    console.error('API Error - PUT /api/books:', error);
+    return NextResponse.json({ 
+      error: 'Error updating book',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }
 
 export async function DELETE(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const id = searchParams.get('id');
-
+    const { id } = await request.json();
+    
     if (!id) {
       return NextResponse.json(
         { error: 'Missing book ID' },
@@ -171,35 +142,17 @@ export async function DELETE(request: Request) {
       );
     }
 
-    // Lire les livres existants
-    const books = await readBooks();
-    const bookIndex = books.findIndex(b => b.id === id);
-
-    if (bookIndex === -1) {
-      return NextResponse.json(
-        { error: 'Book not found' },
-        { status: 404 }
-      );
+    const success = await bookService.deleteBook(id);
+    if (!success) {
+      return NextResponse.json({ error: 'Book not found' }, { status: 404 });
     }
-
-    // Supprimer l'image
-    const imagePath = path.join(process.cwd(), 'public', books[bookIndex].image);
-    try {
-      await fs.unlink(imagePath);
-    } catch (error) {
-      console.error('Error deleting image:', error);
-    }
-
-    // Supprimer le livre
-    books.splice(bookIndex, 1);
-    await writeBooks(books);
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting book:', error);
-    return NextResponse.json(
-      { error: 'Error deleting book' },
-      { status: 500 }
-    );
+    console.error('API Error - DELETE /api/books:', error);
+    return NextResponse.json({ 
+      error: 'Error deleting book',
+      details: error instanceof Error ? error.message : String(error)
+    }, { status: 500 });
   }
 }

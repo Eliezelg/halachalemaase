@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { ToastProvider } from '@/components/ui/toast';
 
 export const metadata: Metadata = {
   title: 'הלכה למעשה | בית ההוראה',
@@ -19,17 +20,6 @@ export const metadata: Metadata = {
     title: 'הלכה למעשה | בית ההוראה',
     description: 'בית ההוראה הלכה למעשה - מרכז תורני להוראה והפצת תורה',
   },
-  alternates: {
-    canonical: 'https://hl5047.co.il',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-    },
-  },
 };
 
 export default function RootLayout({
@@ -41,11 +31,13 @@ export default function RootLayout({
     <html lang="he" dir="rtl">
       <body className="bg-wheat-50 min-h-screen flex flex-col">
         <div className="min-h-screen bg-wheat-50 flex flex-col">
-          <Header />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
+          <ToastProvider>
+            <Header />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </ToastProvider>
         </div>
       </body>
     </html>

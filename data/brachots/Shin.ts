@@ -240,6 +240,177 @@ export const shinBrachot: BlessingCategory = {
       firstBlessing: "שהכל",
       lastBlessing: "נפשות",
       description: ""
+    },
+    {
+      name: "שכר העשוי מתמרים",
+      firstBlessing: "שהכל",
+      lastBlessing: "נפשות רק אם שתה רביעית (כחצי כוס חד פעמי) תוך 3-4 שניות. ואם אין דרכו בכך, לבני ספרד אינו מברך"
+    },
+    {
+      name: "שלאגר",
+      firstBlessing: "שהכל",
+      lastBlessing: "ראה משקאות, ושכר העשוי מתמרים",
+      description: "משקה אלכוהול מוגז"
+    },
+    {
+      name: "שלגון מגה",
+      firstBlessing: "מזונות",
+      lastBlessing: "ראה גלידה",
+      description: "שלגון המכיל שברי עוגיות, מיוצר על ידי חברת נסטלה. ראה גלידת עוגיות. אם העוגיות מפוזרות רק בחלקו העליון, כשסיים עם העוגיות, מברך על השלגון שהכל"
+    },
+    {
+      name: "שלוה",
+      firstBlessing: "אדמה",
+      lastBlessing: "נפשות",
+      description: "ב-80 אחדים (5 גרם) יש שיעור ברכה אחרונה"
+    },
+    {
+      name: "שלפח",
+      firstBlessing: "אדמה",
+      lastBlessing: "נפשות",
+      description: "פרי הנראה כעין בצלצלים קטנים, צבעו אדום, נאכל בפני עצמו, טעמו חמוץ מעט"
+    },
+    {
+      name: "שמיר",
+      firstBlessing: "אינו מברך",
+      lastBlessing: "",
+      description: "ואם הטעימו על ידי שמן או מלח, מברך שהכל"
+    },
+    {
+      name: "שמן אגוזים / אקליפטוס / בוטנים / חמניות / קוקוס ועוד",
+      firstBlessing: "אינו מברך",
+      lastBlessing: "",
+      description: "כשהוא לבדו, אינו מברך. כשעירבו עם דברים אחרים, עיין הליכות ברכות סימן רב סעיף כד וכו"
+      },
+    {
+      name: "שמן זית",
+      firstBlessing: "אינו מברך",
+      lastBlessing: "",
+      description: "כשהוא לבדו, אינו מברך. כשעירבו עם דברים אחרים, עיין הליכות ברכות סימן רב סעיף כד וכו"
+    },
+    {
+      name: "שמרי יין",
+      firstBlessing: "הגפן",
+      lastBlessing: "אינו מברך",
+      description: "המוצץ את היין שבשמרים, מברך הגפן. לאחריו אינו מברך היות ולא ניתן למצוץ רביעית תוך 3-4 שניות. ויש מבני אשכנז הנוהגים לברך. האוכל שמרי יין כמות שהם, אינו מברך דאזוקי מזיק (אינם טעימים כלל)"
+    },
+    {
+      name: "שמפניה",
+      firstBlessing: "הגפן",
+      lastBlessing: "ראה יין",
+      description: "דינו כיין רגיל"
+    },
+    {
+      name: "שניצל סויה",
+      firstBlessing: "שהכל",
+      lastBlessing: "נפשות"
+    },
+    {
+      name: "שניצל עוף",
+      firstBlessing: "שהכל",
+      lastBlessing: "נפשות",
+      description: "אם הציפוי עבה, מברך מזונות. ואם אכל ממנו כזית, מברך על המחיה"
+    },
+    {
+      name: "שניצל עוף אפוי עם פירורי לחם",
+      firstBlessing: "שהכל",
+      lastBlessing: "נפשות",
+      description: "אם הציפוי עבה וניכרים הפירורי לחם, המוציא וברכת המזון, אם יש שיעור כזית בפירורי לחם. אם טיבל היטב את הפירורי לחם עם ביצה וכדו\' עד שלא ניכר שזה פירורי לחם, מזונות ועל המחיה"
+    },
+    {
+      name: "שניצל תירס",
+      firstBlessing: "שהכל",
+      lastBlessing: "נפשות",
+      description: "ואם העיקר אצלו זה התירס מברך אדמה"
+    },
+    {
+      name: "שסק",
+      firstBlessing: "עץ",
+      lastBlessing: "נפשות",
+      description: "אכלו מבושל, שהכל אלא אם כן הושבח בבישולו כגון בקומפוט"
+    },
+    {
+      name: "שעוונית",
+      firstBlessing: "אדמה",
+      lastBlessing: "נפשות"
+    },
+    {
+      name: "שעועית הגלידה",
+      firstBlessing: "עץ",
+      lastBlessing: "נפשות",
+      description: "פרי מתוק מאוד, דומה בצורתו לתרמיל שעועית, צבעו ירוק"
+    },
+    {
+      name: "שעועית חיה",
+      firstBlessing: "אינו מברך",
+      lastBlessing: "",
+      description: "מבושלת אדמה ונפשות"
+    },
+    {
+      name: "שעועית ירוקה",
+      firstBlessing: "מבושל האדמה, חי שהכל",
+      lastBlessing: "",
+      description: "ואם בירך האדמה יצא"
+    },
+    {
+      name: "שערות סבתא",
+      firstBlessing: "שהכל",
+      lastBlessing: "נפשות",
+      description: "ביחידה אחת יש ודאי שיעור כזית"
+    },
+    {
+      name: "שקד",
+      firstBlessing: "העץ",
+      lastBlessing: "",
+      description: "אף שאינו קלוי"
+    },
+    {
+      name: "שקד ממרח ושקד ממתק",
+      firstBlessing: "",
+      lastBlessing: "",
+      description: "ראה ממרח שקדים וממתק שקדים"
+    },
+    {
+      name: "שקדי מרק",
+      firstBlessing: "מזונות",
+      lastBlessing: "על המחיה",
+      description: "גם אם קבע עליהם סעודתו"
+    },
+    {
+      name: "שקדי מרק לפסח",
+      firstBlessing: "שהכל",
+      lastBlessing: "נפשות"
+    },
+    {
+      name: "שקדיה",
+      firstBlessing: "שהכל",
+      lastBlessing: "נפשות",
+      description: "חברת ירושלים לממתקים"
+    },
+    {
+      name: "שקדים ירוקים",
+      firstBlessing: "העץ",
+      lastBlessing: "",
+      description: "בעודו ג\'ל, שהכל"
+    },
+    {
+      name: "שקדים מצופים שוקולד",
+      firstBlessing: "עץ",
+      lastBlessing: "נפשות",
+      description: "אם מוצץ תחילה את השוקולד, מברך גם על השוקולד"
+    },
+    {
+      name: "שקשוקה",
+      firstBlessing: "לפי הרוב",
+      lastBlessing: "נפשות",
+      description: "עגבניות מבושלות עם ביצים. אם העגבניות עבורו רק להטעים את הביצים, מברך שהכל"
+    },
+    {
+      name: "שתה שתיה חריפה ואוכל לחם, עוגה, פרי מתוק",
+      firstBlessing: "רק על השתיה החריפה",
+      lastBlessing: "",
+      description: "רק לשם העברת החריפות. אם אכל מהם כזית, צריך לברך עליהם ברכה אחרונה, היות ולא מברך נפשות על השתיה החריפה"
     }
+
   ]
 }

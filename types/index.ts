@@ -10,15 +10,18 @@ export interface Rabbi {
   city: string;
 }
 
-export type Topic =
-  | 'נדה'
-  | 'שבת'
-  | 'בשר בחלב'
-  | 'טבילת כלים'
-  | 'ברכות'
-  | 'תפילה'
-  | 'חגים'
-  | 'חושן משפט';
+export const TOPICS = [
+  'נדה',
+  'שבת',
+  'בשר בחלב',
+  'טבילת כלים',
+  'ברכות',
+  'תפילה',
+  'חגים',
+  'חושן משפט',
+] as const;
+
+export type Topic = typeof TOPICS[number];
 
 export interface QA {
   id: string;
@@ -48,12 +51,13 @@ export interface Book {
 }
 
 export interface Distributor {
-  id?: string;
-  city?: string;
-  name?: string;
-  phone?: string;
-  address?: string;
-  note?: string;
+  id: string;
+  name: string;
+  city: string;
+  address: string;
+  phone: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface Shiur {

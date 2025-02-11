@@ -39,10 +39,10 @@ const Hero = () => {
                השיעורים של הרב
             </Link>
             <a
-              href="/downloads"
+              href="/questions"
               className="inline-block bg-primary-600 text-white px-8 py-4 rounded-xl font-medium hover:bg-primary-700 transform hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-primary-300/50"
             >
-              העלון השבועי
+              שאלות ותשובות
             </a>
           </div>
         </div>

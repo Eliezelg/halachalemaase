@@ -1,193 +1,190 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Distributor } from '@/types';
 import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { useToast } from "@/components/ui/toast";
 
 const DistributorManager = () => {
   const [distributors, setDistributors] = useState<Distributor[]>([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [currentDistributor, setCurrentDistributor] = useState<Partial<Distributor>>({});
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (currentDistributor.id) {
-        await fetch('/api/distributors', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: currentDistributor.id, ...currentDistributor }),
-        });
-      } else {
-        await fetch('/api/distributors', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(currentDistributor),
-        });
-      }
-      setIsEditing(false);
-      setCurrentDistributor({});
-      loadDistributors();
-    } catch (error) {
-      console.error('Error saving distributor:', error);
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('האם אתה בטוח שברצונך למחוק מפיץ זה?')) return;
-    try {
-      await fetch('/api/distributors', {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id }),
-      });
-      loadDistributors();
-    } catch (error) {
-      console.error('Error deleting distributor:', error);
-    }
-  };
-
-  const loadDistributors = async () => {
-    try {
-      const response = await fetch('/api/distributors');
-      const data = await response.json();
-      setDistributors(data);
-    } catch (error) {
-      console.error('Error loading distributors:', error);
-    }
-  };
+  const [editingDistributor, setEditingDistributor] = useState<Distributor | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    city: '',
+    phone: '',
+  });
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadDistributors();
   }, []);
 
+  const loadDistributors = async () => {
+    try {
+      const response = await fetch('/api/distributors');
+      if (!response.ok) {
+        throw new Error('Failed to load distributors');
+      }
+      const data = await response.json();
+      setDistributors(data);
+    } catch (error) {
+      toast('שגיאה בטעינת המפיצים', 'error');
+      console.error('Error loading distributors:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const response = await fetch('/api/distributors', {
+        method: editingDistributor ? 'PUT' : 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...formData,
+          ...(editingDistributor && { id: editingDistributor.id }),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save distributor');
+      }
+
+      toast(editingDistributor ? 'המפיץ עודכן בהצלחה' : 'המפיץ נוסף בהצלחה', 'success');
+      resetForm();
+      loadDistributors();
+    } catch (error) {
+      toast('שגיאה בשמירת המפיץ', 'error');
+      console.error('Error saving distributor:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('האם אתה בטוח שברצונך למחוק מפיץ זה?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/distributors', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete distributor');
+      }
+
+      toast('המפיץ נמחק בהצלחה', 'success');
+      loadDistributors();
+    } catch (error) {
+      toast('שגיאה במחיקת המפיץ', 'error');
+      console.error('Error deleting distributor:', error);
+    }
+  };
+
+  const handleEdit = (distributor: Distributor) => {
+    setEditingDistributor(distributor);
+    setFormData({
+      name: distributor.name,
+      city: distributor.city,
+      phone: distributor.phone || '',
+    });
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      city: '',
+      phone: '',
+    });
+    setEditingDistributor(null);
+  };
+
   return (
-    <div className="space-y-6">
-      <button
-        onClick={() => {
-          setCurrentDistributor({});
-          setIsEditing(true);
-        }}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 flex items-center gap-2"
-      >
-        <Plus size={20} />
-        הוסף מפיץ חדש
-      </button>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">ניהול מפיצים</h1>
+      
+      <form onSubmit={handleSubmit} className="mb-8 space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">שם</label>
+          <input
+            type="text"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">עיר</label>
+          <input
+            type="text"
+            value={formData.city}
+            onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium mb-1">טלפון</label>
+          <input
+            type="tel"
+            value={formData.phone}
+            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+            className="w-full p-2 border rounded"
+          />
+        </div>
 
-      {isEditing && (
-        <form onSubmit={handleSubmit} className="space-y-4 bg-gray-50 p-4 rounded">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">שם</label>
-            <input
-              type="text"
-              value={currentDistributor.name || ''}
-              onChange={(e) => setCurrentDistributor(prev => ({ ...prev, name: e.target.value }))}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">כתובת</label>
-            <input
-              type="text"
-              value={currentDistributor.address || ''}
-              onChange={(e) => setCurrentDistributor(prev => ({ ...prev, address: e.target.value }))}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">עיר</label>
-            <input
-              type="text"
-              value={currentDistributor.city || ''}
-              onChange={(e) => setCurrentDistributor(prev => ({ ...prev, city: e.target.value }))}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">טלפון</label>
-            <input
-              type="tel"
-              value={currentDistributor.phone || ''}
-              onChange={(e) => setCurrentDistributor(prev => ({ ...prev, phone: e.target.value }))}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">דוא"ל</label>
-            <input
-              type="email"
-              value={currentDistributor.email || ''}
-              onChange={(e) => setCurrentDistributor(prev => ({ ...prev, email: e.target.value }))}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">הערות</label>
-            <textarea
-              value={currentDistributor.notes || ''}
-              onChange={(e) => setCurrentDistributor(prev => ({ ...prev, notes: e.target.value }))}
-              className="mt-1 block w-full rounded border-gray-300 shadow-sm"
-              rows={3}
-            />
-          </div>
-          <div className="flex justify-end gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                setIsEditing(false);
-                setCurrentDistributor({});
-              }}
-              className="px-4 py-2 border rounded hover:bg-gray-50"
-            >
-              ביטול
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              שמור
-            </button>
-          </div>
-        </form>
-      )}
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
+        >
+          {loading ? 'שומר...' : editingDistributor ? 'עדכן מפיץ' : 'הוסף מפיץ'}
+        </button>
 
-      <div className="space-y-4">
+        {editingDistributor && (
+          <button
+            type="button"
+            onClick={resetForm}
+            className="mr-2 px-4 py-2 border rounded hover:bg-gray-100"
+          >
+            בטל עריכה
+          </button>
+        )}
+      </form>
+
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {distributors.map((distributor) => (
-          <div key={distributor.id} className="border rounded-lg p-4 bg-white">
-            <div className="flex justify-between items-start">
-              <div>
-                {distributor.name && (
-                  <h3 className="font-semibold">{distributor.name}</h3>
-                )}
-                {(distributor.address || distributor.city) && (
-                  <p className="text-sm text-gray-600">
-                    {[distributor.address, distributor.city].filter(Boolean).join(', ')}
-                  </p>
-                )}
-                {distributor.phone && (
-                  <p className="text-sm text-gray-600">{distributor.phone}</p>
-                )}
-                {distributor.notes && (
-                  <p className="text-sm text-gray-500 mt-2">{distributor.notes}</p>
-                )}
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => {
-                    setCurrentDistributor(distributor);
-                    setIsEditing(true);
-                  }}
-                  className="p-2 text-blue-600 hover:bg-blue-50 rounded"
-                >
-                  <Edit2 size={20} />
-                </button>
-                <button
-                  onClick={() => distributor.id && handleDelete(distributor.id)}
-                  className="p-2 text-red-600 hover:bg-red-50 rounded"
-                >
-                  <Trash2 size={20} />
-                </button>
-              </div>
+          <div key={distributor.id} className="border rounded p-4">
+            <div className="font-bold">{distributor.name}</div>
+            <div>{distributor.city}</div>
+            {distributor.phone && <div>{distributor.phone}</div>}
+            
+            <div className="mt-2 space-x-2 flex justify-end">
+              <button
+                onClick={() => handleEdit(distributor)}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <Edit2 className="h-4 w-4" />
+              </button>
+              <button
+                onClick={() => handleDelete(distributor.id)}
+                className="p-1 hover:bg-gray-100 rounded text-red-500"
+              >
+                <Trash2 className="h-4 w-4" />
+              </button>
             </div>
           </div>
         ))}

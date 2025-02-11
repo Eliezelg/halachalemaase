@@ -1,9 +1,50 @@
 'use client';
 
 import Link from '@/components/Link';
-import { books } from '@/data/books';
+import { useEffect, useState } from 'react';
+import { Book } from '@/types';
 
 const BooksPage = () => {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await fetch('/api/books');
+        if (!response.ok) {
+          throw new Error('Failed to fetch books');
+        }
+        const data = await response.json();
+        setBooks(data);
+      } catch (err) {
+        setError('Error loading books');
+        console.error('Error loading books:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-burgundy-700"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="text-red-600 text-xl">{error}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-wheat-50 min-h-screen py-12">
       <div className="container mx-auto px-4">
@@ -19,11 +60,17 @@ const BooksPage = () => {
                       חדש
                     </div>
                   )}
-                  <img 
-                    src={book.image} 
-                    alt={book.title} 
-                    className="w-full h-full object-contain object-center p-2"
-                  />
+                  {book.imageUrl ? (
+                    <img 
+                      src={book.imageUrl} 
+                      alt={book.title} 
+                      className="w-full h-full object-contain object-center p-2"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                      <span className="text-gray-400">אין תמונה</span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-4 text-center">
                   <h3 className="font-bold text-lg mb-2 text-burgundy-700">{book.title}</h3>

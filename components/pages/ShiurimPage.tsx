@@ -100,9 +100,9 @@ const ShiurimPage: React.FC = () => {
                 {city}
               </h3>
               <div className="grid gap-6">
-                {cityShiurim.map((shiur, index) => (
+                {cityShiurim.map((shiur) => (
                   <div
-                    key={index}
+                    key={`${shiur.city}-${shiur.location}-${shiur.time}`}
                     className="bg-white shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow"
                   >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

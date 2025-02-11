@@ -13,11 +13,11 @@ const BlessingList: React.FC<BlessingListProps> = ({ categories }) => {
 
   const filteredCategories = categories.map(category => ({
     ...category,
-    blessings: category.blessings.filter(blessing =>
+    blessings: (category.blessings || category.items || []).filter(blessing =>
       blessing.name.includes(searchTerm) ||
       (blessing.description?.includes(searchTerm))
     )
-  })).filter(category => category.blessings.length > 0);
+  })).filter(category => (category.blessings || []).length > 0);
 
   return (
     <div 
@@ -59,46 +59,34 @@ const BlessingList: React.FC<BlessingListProps> = ({ categories }) => {
       {/* Liste des bénédictions */}
       <div className="space-y-8">
         {filteredCategories.map(category => (
-          (!selectedCategory || category.title === selectedCategory) && (
-            <div key={category.title} className="bg-white rounded-lg shadow-md p-6">
-              <h2 className="text-2xl font-bold mb-4 text-right">{category.title}</h2>
-              <div className="space-y-4">
-                {category.blessings.map((blessing, index) => (
-                  <div 
-                    key={index} 
-                    className="border-b pb-4 text-right select-none"
-                    onCopy={(e) => e.preventDefault()}
-                    onCut={(e) => e.preventDefault()}
-                    onPaste={(e) => e.preventDefault()}
-                    onSelect={(e) => e.preventDefault()}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="text-right flex-grow">
-                        <h3 className="text-xl font-semibold mb-2">{blessing.name}</h3>
-                        {blessing.description && (
-                          <p className="text-gray-600 mb-2">{blessing.description}</p>
-                        )}
-                        <div className="flex gap-4 justify-end text-sm">
-                          {blessing.firstBlessing && (
-                            <div>
-                              <span className="font-medium">ברכה ראשונה: </span>
-                              <span>{blessing.firstBlessing}</span>
-                            </div>
-                          )}
-                          {blessing.lastBlessing && (
-                            <div>
-                              <span className="font-medium">ברכה אחרונה: </span>
-                              <span>{blessing.lastBlessing}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+          <div 
+            key={category.title}
+            className={`${
+              selectedCategory && category.title !== selectedCategory ? 'hidden' : ''
+            }`}
+          >
+            <h2 className="text-3xl font-bold mb-4 text-right">{category.title}</h2>
+            <div className="space-y-4">
+              {(category.blessings || category.items || []).map(blessing => (
+                <div
+                  key={blessing.name}
+                  className="bg-white rounded-lg shadow-md p-4"
+                  dir="rtl"
+                >
+                  <h3 className="text-xl font-semibold mb-2">{blessing.name}</h3>
+                  <div className="space-y-2">
+                    <p><strong>ברכה ראשונה:</strong> {blessing.firstBlessing}</p>
+                    {blessing.lastBlessing && (
+                      <p><strong>ברכה אחרונה:</strong> {blessing.lastBlessing}</p>
+                    )}
+                    {blessing.description && (
+                      <p className="text-gray-600">{blessing.description}</p>
+                    )}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
-          )
+          </div>
         ))}
       </div>
     </div>

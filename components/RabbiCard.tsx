@@ -1,59 +1,93 @@
 'use client';
 
 import { Rabbi } from '@/types';
-import { Phone, MapPin } from 'lucide-react';
+import { MapPin } from 'lucide-react';
+import Image from 'next/image';
+import React from 'react';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface RabbiCardProps {
   rabbi: Rabbi;
+  onEdit?: (rabbi: Rabbi) => void;
+  onDelete?: (id: string) => void;
 }
 
-const RabbiCard: React.FC<RabbiCardProps> = ({ rabbi }) => {
+const RabbiCard: React.FC<RabbiCardProps> = ({ rabbi, onEdit, onDelete }) => {
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-      <div className="aspect-square relative overflow-hidden">
-        <img
-          src={rabbi.photo}
-          alt={`הרב ${rabbi.firstName} ${rabbi.lastName}`}
-          className="w-full h-full object-cover"
-        />
-      </div>
-      <div className="p-6">
-        <h3 className="text-xl font-bold text-primary-800 mb-2">
-          הרב {rabbi.firstName} {rabbi.lastName}
-        </h3>
-
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-gray-600">
-            <Phone size={18} />
-            <a href={`tel:${rabbi.phone}`} className="hover:text-primary-600">
-              {rabbi.phone}
-            </a>
+    <Card className="w-full max-w-md">
+      <CardHeader>
+        <div className="flex items-center gap-4">
+          <div className="relative w-16 h-16 rounded-full overflow-hidden">
+            <Image
+              src={rabbi.imageUrl || '/rabbis/rav.png'}
+              alt={`הרב ${rabbi.firstName} ${rabbi.lastName}`}
+              fill
+              className="object-cover"
+            />
           </div>
-
-          <div className="flex items-start gap-2 text-gray-600">
-            <MapPin size={18} className="mt-1 flex-shrink-0" />
-            <span>{rabbi.address}</span>
+          <div>
+            <CardTitle>{`הרב ${rabbi.firstName} ${rabbi.lastName}`}</CardTitle>
+            <CardDescription>{rabbi.city}</CardDescription>
           </div>
         </div>
-
-        <div className="mt-4">
-          <div className="flex flex-wrap gap-2">
-            {rabbi.topics.map((topic) => (
-              <span
-                key={topic}
-                className="px-2 py-1 bg-primary-100 text-primary-800 rounded-full text-sm"       
-              >
+      </CardHeader>
+      <CardContent>
+        {rabbi.description && (
+          <p className="text-sm text-gray-500 mb-4">{rabbi.description}</p>
+        )}
+        {rabbi.topics.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {rabbi.topics.map((topic, index) => (
+              <Badge key={index} variant="secondary">
                 {topic}
-              </span>
+              </Badge>
             ))}
           </div>
-        </div>
-
-        {rabbi.description && (
-          <p className="mt-4 text-gray-600">{rabbi.description}</p>
         )}
-      </div>
-    </div>
+        {rabbi.languages.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            <span className="text-sm font-semibold">Langues:</span>
+            {rabbi.languages.map((language, index) => (
+              <Badge key={index} variant="outline">
+                {language}
+              </Badge>
+            ))}
+          </div>
+        )}
+        {rabbi.address && (
+          <p className="text-sm">
+            <span className="font-semibold">Adresse:</span> {rabbi.address}
+          </p>
+        )}
+      </CardContent>
+      <CardFooter className="flex justify-end space-x-2">
+        {onEdit && (
+          <Button
+            variant="outline"
+            onClick={() => onEdit(rabbi)}
+          >
+            Modifier
+          </Button>
+        )}
+        {onDelete && (
+          <Button
+            variant="destructive"
+            onClick={() => onDelete(rabbi.id)}
+          >
+            Supprimer
+          </Button>
+        )}
+      </CardFooter>
+    </Card>
   );
 };
 

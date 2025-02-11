@@ -40,7 +40,23 @@ const Footer = () => {
             <ul className="space-y-4">
               <li className="flex items-center gap-3">
                 <Clock className="w-5 h-5 text-accent-gold-400" />
-                <span>24/6 מענה הלכתי</span>
+                <span>שלוחה 1 24/6</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Clock className="w-5 h-5 text-accent-gold-400" />
+                <span>שלוחה 2 ממונות 21:00-23:00 ריבית 16:00-24:00</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Clock className="w-5 h-5 text-accent-gold-400" />
+                <span>שלוחה 5 (חינוך ילדים) 17:00-22:00</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Clock className="w-5 h-5 text-accent-gold-400" />
+                <span>שלוחה 6 (שלום בית) 8:00-24:00</span>
+              </li>
+              <li className="flex items-center gap-3">
+                <Clock className="w-5 h-5 text-accent-gold-400" />
+                <span>שלוחה 7 (לשון הרע) 16:00-24:00</span>
               </li>
             </ul>
           </div>

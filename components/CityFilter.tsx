@@ -1,5 +1,7 @@
 'use client';
 
+import React from 'react';
+
 interface CityFilterProps {
   cities: string[];
   selectedCity: string;
@@ -9,27 +11,17 @@ interface CityFilterProps {
 const CityFilter: React.FC<CityFilterProps> = ({ cities, selectedCity, onCityChange }) => {
   return (
     <div className="flex flex-wrap gap-3 justify-center">
-      <button
-        onClick={() => onCityChange('all')}
-        className={`px-4 py-2 rounded-full transition-colors ${
-          selectedCity === 'all'
-            ? 'bg-primary-600 text-white'
-            : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
-        }`}
-      >
-        כל הערים
-      </button>
-      {cities.map((city) => (
+      {[{ id: 'all', name: 'כל הערים' }, ...cities.map(city => ({ id: city, name: city }))].map((item) => (
         <button
-          key={city}
-          onClick={() => onCityChange(city)}
+          key={item.id}
+          onClick={() => onCityChange(item.id)}
           className={`px-4 py-2 rounded-full transition-colors ${
-            selectedCity === city
+            selectedCity === item.id
               ? 'bg-primary-600 text-white'
               : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
           }`}
         >
-          {city}
+          {item.name}
         </button>
       ))}
     </div>

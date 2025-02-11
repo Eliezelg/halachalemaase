@@ -17,19 +17,19 @@ const shiurimData = [
     image: '/shiurim/bnebrak.png',
     title: 'השיעור ביה"כ יביע אומר בני ברק',
     description: 'ימי רביעי מ22:15 בטלפון 5047* שלוחה 4-9',
-    link: 'https://www.youtube.com/channel/UCiT6KgOE1IDJ2XHE23Zk2Cg'
+    link: 'https://www.youtube.com/playlist?list=PL8LYcFmuulgtvWotNo8CeOnZQ4M6noz9S'
   },
   {
     image: '/shiurim/kolhai.png',
     title: 'שאלות ותשובות ברדיו קול חי',
     description: 'כל יום חמישי בין 22:00 ל24:00',
-    link: ''
+    link: 'https://www.youtube.com/playlist?list=PL8LYcFmuulgsfQ2xQrF2NK9kMO7bpGYsD'
   },
   {
     image: '/shiurim/hidon.png',
     title: ' חידון הלכה למעשה תשפ"ה',
     description: 'על הלכות שבת ברדיו קול חי',
-    link: 'https://www.youtube.com/live/TwAj9CzNVgY'
+    link: 'https://www.youtube.com/playlist?list=PL8LYcFmuulgv8ikBgx8O6M-ORdVwNepJ5'
   }
 ];
 
@@ -42,9 +42,9 @@ const ShiurimSection = () => {
         </h2>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
-          {shiurimData.map((shiur, index) => (
+          {shiurimData.map((shiur) => (
             <a
-              key={index}
+              key={shiur.title}
               href={shiur.link}
               target="_blank"
               rel="noopener noreferrer"

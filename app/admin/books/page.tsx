@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Book } from '@/types/books';
+import { useToast } from '@/components/ui/toast';
 
 export default function BooksAdminPage() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -14,6 +15,7 @@ export default function BooksAdminPage() {
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { toast } = useToast();
 
   useEffect(() => {
     loadBooks();
@@ -22,10 +24,14 @@ export default function BooksAdminPage() {
   const loadBooks = async () => {
     try {
       const response = await fetch('/api/books');
+      if (!response.ok) {
+        throw new Error('שגיאה בטעינת הספרים');
+      }
       const data = await response.json();
-      setBooks(data.books);
+      setBooks(data);
     } catch (err) {
       setError('שגיאה בטעינת הספרים');
+      toast('שגיאה בטעינת הספרים', 'error');
       console.error('Error loading books:', err);
     }
   };
@@ -47,35 +53,51 @@ export default function BooksAdminPage() {
         formData.append('image', coverImage);
       }
 
-      if (editingBook) {
-        formData.append('id', editingBook.id);
-      }
+      const url = editingBook ? `/api/books/${editingBook.id}` : '/api/books';
+      const method = editingBook ? 'PUT' : 'POST';
 
-      const response = await fetch('/api/books', {
-        method: editingBook ? 'PUT' : 'POST',
-        body: formData,
+      const response = await fetch(url, {
+        method,
+        body: formData
       });
 
       if (!response.ok) {
-        throw new Error('Failed to save book');
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'שגיאה בשמירת הספר');
       }
 
-      // Reset form
-      setTitle('');
-      setDescription('');
-      setPrice('');
-      setNedarimPlusLink('');
-      setIsNew(false);
-      setCoverImage(null);
-      setEditingBook(null);
-      
-      // Reload books
-      await loadBooks();
+      toast(editingBook ? 'הספר עודכן בהצלחה' : 'הספר נוסף בהצלחה', 'success');
+      resetForm();
+      loadBooks();
     } catch (err) {
-      setError('שגיאה בשמירת הספר');
-      console.error('Error saving book:', err);
+      const message = err instanceof Error ? err.message : 'שגיאה בשמירת הספר';
+      setError(message);
+      toast(message, 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('האם אתה בטוח שברצונך למחוק ספר זה?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/books/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (!response.ok) {
+        throw new Error('שגיאה במחיקת הספר');
+      }
+
+      toast('הספר נמחק בהצלחה', 'success');
+      loadBooks();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'שגיאה במחיקת הספר';
+      setError(message);
+      toast(message, 'error');
     }
   };
 
@@ -83,215 +105,160 @@ export default function BooksAdminPage() {
     setEditingBook(book);
     setTitle(book.title);
     setDescription(book.description);
-    setPrice(book.price.replace(/[^\d]/g, '')); // Extraire seulement le nombre
-    setNedarimPlusLink(book.nedarimPlusLink);
+    setPrice(book.price || '');
+    setNedarimPlusLink(book.nedarimPlusLink || '');
     setIsNew(book.isNew || false);
+    setCoverImage(null);
   };
 
-  const handleDelete = async (bookId: string) => {
-    if (!window.confirm('האם אתה בטוח שברצונך למחוק ספר זה?')) return;
-
-    try {
-      const response = await fetch(`/api/books?id=${bookId}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete book');
-      }
-
-      await loadBooks();
-    } catch (err) {
-      setError('שגיאה במחיקת הספר');
-      console.error('Error deleting book:', err);
-    }
+  const resetForm = () => {
+    setEditingBook(null);
+    setTitle('');
+    setDescription('');
+    setPrice('');
+    setNedarimPlusLink('');
+    setIsNew(false);
+    setCoverImage(null);
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">ניהול ספרי הרב</h1>
-      
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
-        <h2 className="text-xl font-semibold mb-4">
-          {editingBook ? 'עריכת ספר' : 'הוספת ספר חדש'}
-        </h2>
-        
-        {error && (
-          <div className="bg-red-50 text-red-500 p-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              שם הספר
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full p-2 border rounded-md"
-              required
-            />
-          </div>
+    <div className="container mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8 text-center">ניהול ספרים</h1>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              תיאור
-            </label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full p-2 border rounded-md"
-              rows={4}
-              required
-            />
-          </div>
+      <form onSubmit={handleSubmit} className="max-w-2xl mx-auto mb-12 space-y-6">
+        <div>
+          <label className="block text-lg mb-2">כותרת</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full p-2 border rounded"
+            required
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              מחיר (₪)
-            </label>
-            <input
-              type="number"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="w-full p-2 border rounded-md"
-              required
-              min="0"
-              step="0.01"
-            />
-          </div>
+        <div>
+          <label className="block text-lg mb-2">תיאור</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full p-2 border rounded h-32"
+            required
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              קישור נדרים פלוס
-            </label>
-            <input
-              type="url"
-              value={nedarimPlusLink}
-              onChange={(e) => setNedarimPlusLink(e.target.value)}
-              className="w-full p-2 border rounded-md"
-              placeholder="https://nedar.im/..."
-            />
-          </div>
+        <div>
+          <label className="block text-lg mb-2">מחיר</label>
+          <input
+            type="text"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              תמונת כריכה
-            </label>
-            <input
-              type="file"
-              onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
-              className="w-full p-2 border rounded-md"
-              accept="image/*"
-              required={!editingBook}
-            />
-          </div>
+        <div>
+          <label className="block text-lg mb-2">קישור נדרים פלוס</label>
+          <input
+            type="url"
+            value={nedarimPlusLink}
+            onChange={(e) => setNedarimPlusLink(e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+        </div>
 
-          <div className="flex items-center">
+        <div>
+          <label className="flex items-center space-x-2">
             <input
               type="checkbox"
-              id="isNew"
               checked={isNew}
               onChange={(e) => setIsNew(e.target.checked)}
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
+              className="form-checkbox"
             />
-            <label htmlFor="isNew" className="mr-2 block text-sm text-gray-700">
-              סמן כספר חדש
-            </label>
-          </div>
-
-          <div className="flex justify-end space-x-4">
-            {editingBook && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingBook(null);
-                  setTitle('');
-                  setDescription('');
-                  setPrice('');
-                  setNedarimPlusLink('');
-                  setIsNew(false);
-                  setCoverImage(null);
-                }}
-                className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
-              >
-                ביטול
-              </button>
-            )}
-            <button
-              type="submit"
-              disabled={loading}
-              className={`bg-primary-600 text-white px-4 py-2 rounded-md hover:bg-primary-700 ${
-                loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
-            >
-              {loading ? 'שומר...' : editingBook ? 'עדכן ספר' : 'הוסף ספר'}
-            </button>
-          </div>
-        </form>
-      </div>
-
-      {/* Liste des livres */}
-      <div className="bg-white rounded-lg shadow">
-        <div className="p-6">
-          <h2 className="text-xl font-semibold mb-4">רשימת הספרים</h2>
-          <div className="space-y-4">
-            {books.map((book) => (
-              <div
-                key={book.id}
-                className="border rounded-lg p-4 flex items-center justify-between"
-              >
-                <div className="flex items-center space-x-4">
-                  {book.image && (
-                    <img
-                      src={book.image}
-                      alt={book.title}
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                  )}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-semibold">{book.title}</h3>
-                      {book.isNew && (
-                        <span className="bg-burgundy-600 text-white px-2 py-0.5 rounded-full text-xs">
-                          חדש
-                        </span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-600">{book.price}</p>
-                    {book.nedarimPlusLink && (
-                      <a
-                        href={book.nedarimPlusLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-blue-600 hover:text-blue-800"
-                      >
-                        קישור נדרים פלוס
-                      </a>
-                    )}
-                  </div>
-                </div>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleEdit(book)}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    ערוך
-                  </button>
-                  <button
-                    onClick={() => handleDelete(book.id)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    מחק
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+            <span className="text-lg">חדש</span>
+          </label>
         </div>
+
+        <div>
+          <label className="block text-lg mb-2">תמונת כריכה</label>
+          <input
+            type="file"
+            onChange={(e) => setCoverImage(e.target.files?.[0] || null)}
+            accept="image/*"
+            className="w-full p-2 border rounded"
+          />
+        </div>
+
+        {error && (
+          <div className="text-red-500 text-center py-2">{error}</div>
+        )}
+
+        <div className="flex justify-center space-x-4">
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400"
+          >
+            {loading ? 'שומר...' : editingBook ? 'עדכן ספר' : 'הוסף ספר'}
+          </button>
+          {editingBook && (
+            <button
+              type="button"
+              onClick={resetForm}
+              className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
+            >
+              ביטול
+            </button>
+          )}
+        </div>
+      </form>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {books.map((book) => (
+          <div key={book.id} className="border rounded-lg p-4 shadow">
+            {book.imageUrl && (
+              <img
+                src={book.imageUrl}
+                alt={book.title}
+                className="w-full h-48 object-cover mb-4 rounded"
+              />
+            )}
+            <h2 className="text-xl font-bold mb-2">{book.title}</h2>
+            <p className="text-gray-600 mb-4">{book.description}</p>
+            {book.price && (
+              <p className="text-lg font-semibold mb-2">מחיר: {book.price}</p>
+            )}
+            {book.nedarimPlusLink && (
+              <a
+                href={book.nedarimPlusLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-500 hover:underline block mb-2"
+              >
+                לרכישה בנדרים פלוס
+              </a>
+            )}
+            {book.isNew && (
+              <span className="inline-block bg-green-500 text-white px-2 py-1 rounded text-sm mb-2">
+                חדש!
+              </span>
+            )}
+            <div className="flex justify-end space-x-2">
+              <button
+                onClick={() => handleEdit(book)}
+                className="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-600"
+              >
+                ערוך
+              </button>
+              <button
+                onClick={() => handleDelete(book.id)}
+                className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600"
+              >
+                מחק
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );

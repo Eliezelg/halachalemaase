@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { QA } from '@/types';
+import { useState, useEffect } from 'react';
+import { QA, Rabbi } from '@/types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 interface QuestionCardProps {
@@ -10,6 +10,25 @@ interface QuestionCardProps {
 
 const QuestionCard: React.FC<QuestionCardProps> = ({ qa }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [author, setAuthor] = useState<Rabbi | null>(null);
+
+  useEffect(() => {
+    const loadAuthor = async () => {
+      try {
+        const response = await fetch(`/api/rabbis/${qa.authorId}`);
+        if (response.ok) {
+          const data = await response.json();
+          setAuthor(data);
+        }
+      } catch (error) {
+        console.error('Error loading rabbi:', error);
+      }
+    };
+
+    if (qa.authorId) {
+      loadAuthor();
+    }
+  }, [qa.authorId]);
 
   return (
     <div className="bg-white shadow-lg rounded-lg overflow-hidden">
@@ -45,7 +64,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ qa }) => {
               dangerouslySetInnerHTML={{ __html: qa.answer }}
             />
             <div className="mt-4 text-sm text-gray-500 text-left">
-              נכתב ע"י: {qa.authorId}
+              נכתב ע"י: {author ? `הרב ${author.firstName} ${author.lastName}` : 'טוען...'}
             </div>
           </div>
         </div>

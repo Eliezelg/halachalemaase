@@ -1,17 +1,48 @@
 'use client';
 
 import { ExternalLink } from 'lucide-react';
-import { books } from '@/data/books';
 import Link from '@/components/Link';
+import { useEffect, useState } from 'react';
+import { Book } from '@/types';
 
 interface BookDetailPageProps {
   id: string;
 }
 
 const BookDetailPage = ({ id }: BookDetailPageProps) => {
-  const book = books.find(book => book.id === id);
+  const [book, setBook] = useState<Book | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!book) {
+  useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        const response = await fetch(`/api/books/${id}`);
+        if (!response.ok) {
+          throw new Error('Book not found');
+        }
+        const data = await response.json();
+        setBook(data);
+      } catch (err) {
+        setError('Error loading book');
+        console.error('Error loading book:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBook();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-700"></div>
+      </div>
+    );
+  }
+
+  if (error || !book) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -31,7 +62,7 @@ const BookDetailPage = ({ id }: BookDetailPageProps) => {
           {/* Image */}
           <div className="relative aspect-[3/4] max-w-md mx-auto w-full flex items-center justify-center bg-white rounded-xl shadow-lg">
             <img
-              src={book.image}
+              src={book.imageUrl || '/books/default.png'}
               alt={book.title}
               className="w-full h-full object-contain object-center p-2"
             />
@@ -46,15 +77,17 @@ const BookDetailPage = ({ id }: BookDetailPageProps) => {
               <p className="text-gray-700 whitespace-pre-line">{book.description}</p>
             </div>
 
-            <a
-              href={book.nedarimPlusLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 bg-primary-600 text-white px-8 py-3 rounded-lg hover:bg-primary-700 transition-colors duration-200 text-lg font-semibold w-full md:w-auto"
-            >
-              <span>להזמנה</span>
-              <ExternalLink className="w-5 h-5" />
-            </a>
+            {book.nedarimPlusLink && (
+              <a
+                href={book.nedarimPlusLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-semibold"
+              >
+                <span>לרכישה באתר נדרים פלוס</span>
+                <ExternalLink className="w-5 h-5" />
+              </a>
+            )}
           </div>
         </div>
       </div>

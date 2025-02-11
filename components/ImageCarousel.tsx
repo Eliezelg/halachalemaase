@@ -70,9 +70,9 @@ const ImageCarousel = ({ images }: { images: string[] }) => {
 
       {/* Indicateurs */}
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
-        {images.map((_, index) => (
+        {images.map((image, index) => (
           <button
-            key={index}
+            key={`${image}-${index}`}
             onClick={() => setCurrentIndex(index)}
             className={`w-3 h-3 rounded-full transition-colors ${
               index === currentIndex ? 'bg-white' : 'bg-white/50'

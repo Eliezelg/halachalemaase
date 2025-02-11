@@ -4,16 +4,17 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Autoplay } from 'swiper/modules';
 import Link from './Link';
-import { books } from '@/data/books';
+import { useEffect, useState } from 'react';
+import { Book } from '@/types';
 
 // Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/autoplay';
 
-const BookCard = ({ title, image, price, id }: {
+const BookCard = ({ title, imageUrl, price, id }: {
   title: string;
-  image: string;
+  imageUrl: string;
   price: string;
   id: string;
 }) => (
@@ -21,7 +22,7 @@ const BookCard = ({ title, image, price, id }: {
     <div className="bg-white rounded-xl shadow-md overflow-hidden transform hover:scale-105 transition-all duration-300 hover:shadow-xl border border-primary-200">
       <div className="relative aspect-[3/4] max-h-[250px] w-full flex items-center justify-center bg-white">
         <img 
-          src={image} 
+          src={imageUrl || '/books/default.png'} 
           alt={title} 
           className="max-w-full max-h-full object-contain mx-auto p-2" 
         />
@@ -36,6 +37,46 @@ const BookCard = ({ title, image, price, id }: {
 );
 
 const BooksSection = () => {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await fetch('/api/books');
+        if (!response.ok) {
+          throw new Error('Failed to fetch books');
+        }
+        const data = await response.json();
+        setBooks(data);
+      } catch (err) {
+        setError('Error loading books');
+        console.error('Error loading books:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="py-16 bg-gradient-to-b from-primary-50 to-white">
+        <div className="container mx-auto px-4">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-700"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !books.length) {
+    return null;
+  }
+
   return (
     <section className="py-16 bg-gradient-to-b from-primary-50 to-white">
       <div className="container mx-auto px-4">
@@ -50,35 +91,40 @@ const BooksSection = () => {
         <div className="relative group">
           <Swiper
             modules={[Navigation, Autoplay]}
-            spaceBetween={20}
+            spaceBetween={24}
             slidesPerView={1}
-            autoplay={{
-              delay: 3000,
-              disableOnInteraction: false,
-            }}
             navigation={{
               prevEl: '.swiper-button-prev',
               nextEl: '.swiper-button-next',
+            }}
+            autoplay={{
+              delay: 5000,
+              disableOnInteraction: false,
             }}
             breakpoints={{
               640: { slidesPerView: 2 },
               768: { slidesPerView: 3 },
               1024: { slidesPerView: 4 },
             }}
-            className="!px-12"
+            className="py-4"
           >
             {books.map((book) => (
               <SwiperSlide key={book.id}>
-                <BookCard {...book} />
+                <BookCard
+                  id={book.id}
+                  title={book.title}
+                  imageUrl={book.imageUrl}
+                  price={book.price || ''}
+                />
               </SwiperSlide>
             ))}
           </Swiper>
-          
-          <button className="swiper-button-prev absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-md z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ChevronRight className="w-6 h-6 text-primary-600" />
+
+          <button className="swiper-button-prev absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white">
+            <ChevronRight className="w-6 h-6 text-primary-700" />
           </button>
-          <button className="swiper-button-next absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 flex items-center justify-center bg-white rounded-full shadow-md z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-            <ChevronLeft className="w-6 h-6 text-primary-600" />
+          <button className="swiper-button-next absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/80 rounded-full p-2 shadow-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white">
+            <ChevronLeft className="w-6 h-6 text-primary-700" />
           </button>
         </div>
       </div>
